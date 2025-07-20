@@ -1,6 +1,6 @@
 from typing import List
 
-from sqlalchemy import Integer, Text
+from sqlalchemy import Identity, Integer, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import Base
@@ -9,10 +9,12 @@ from .base import Base
 class User(Base):
     __tablename__ = "users"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    email: Mapped[str] = mapped_column(Text, unique=True, index=True)
-    name: Mapped[str] = mapped_column(Text)
-    password_hash: Mapped[str] = mapped_column(Text)
-    refresh_token: Mapped[List["RefreshToken"]] = relationship(
-        back_populates="users", passive_deletes=True
+    id: Mapped[int] = mapped_column(
+        Integer, Identity(), primary_key=True, autoincrement=True
+    )
+    email: Mapped[str] = mapped_column(Text, unique=True, nullable=False)
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    password_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    refresh_tokens: Mapped[List["RefreshToken"]] = relationship(
+        back_populates="user", passive_deletes=True
     )

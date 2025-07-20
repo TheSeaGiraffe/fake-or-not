@@ -1,3 +1,5 @@
+set dotenv-load
+
 # List all available recipes
 default:
     just -l -u
@@ -9,6 +11,10 @@ run:
 # Start the application using uvicorn
 run_uvicorn:
     uv run uvicorn app.main:app --port 8000
+
+# Connect to DB
+db:
+    psql "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB"
 
 # Create a new migration
 migrate_create +args:
