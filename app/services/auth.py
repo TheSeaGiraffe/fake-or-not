@@ -6,7 +6,7 @@ import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import APIKeyHeader, OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import JWT_ALGORITHM, JWT_REFRESH_TOKEN_LENGTH, JWT_SECRET_KEY
@@ -88,15 +88,22 @@ async def create_refresh_token(user: User, db: AsyncSession) -> str:
     return token_plaintext
 
 
-async def get_current_user_by_refresh_token(
+# def validate_token_header(token_header: str):
+def validate_token_header(
     token_header: str = Depends(APIKeyHeader(name="Authorization")),
-    db: AsyncSession = Depends(get_async_session),
-) -> User:
+) -> None:
     header_parts = token_header.split()
     if len(header_parts) != 2 or header_parts[0] != "Bearer":
         raise InvalidCredentialsException
 
-    token_hash = hash_token(header_parts[1])
+
+async def get_current_user_by_refresh_token(
+    token_header: str = Depends(APIKeyHeader(name="Authorization")),
+    db: AsyncSession = Depends(get_async_session),
+) -> User:
+    # token = validate_token_header(token_header)
+    token = token_header.split()[1]
+    token_hash = hash_token(token)
     query = select(RefreshToken).where(
         RefreshToken.hash == token_hash,
         RefreshToken.expiry >= datetime.now(timezone.utc),
@@ -106,9 +113,13 @@ async def get_current_user_by_refresh_token(
     if refresh_token is None:
         raise InvalidCredentialsException
 
-    # query = select(RefreshToken).where(RefreshToken.id == refresh_token.id)
-    # result = await db.execute(query)
-    # refresh_token_from_id: RefreshToken = result.scalar_one()
-    # return refresh_token_from_id.user
-
     return refresh_token.user
+
+
+async def delete_refresh_token(token_header: str, db: AsyncSession) -> None:
+    # token = validate_token_header(token_header)
+    token = token_header.split()[1]
+    token_hash = hash_token(token)
+    query = delete(RefreshToken).where(RefreshToken.hash == token_hash)
+    await db.execute(query)
+    await db.commit()

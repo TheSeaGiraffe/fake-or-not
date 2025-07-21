@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import APIKeyHeader, OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import JWT_ACCESS_TOKEN_EXPIRE_MINUTES
@@ -13,8 +13,10 @@ from app.services.auth import (
     authenticate_user,
     create_access_token,
     create_refresh_token,
+    delete_refresh_token,
     get_current_user_by_access_token,
     get_current_user_by_refresh_token,
+    validate_token_header,
 )
 from app.services.user import create_user
 
@@ -55,7 +57,7 @@ async def login_user(
     return Token(access_token=access_token, refresh_token=token)
 
 
-@router.post("/refresh")
+@router.post("/token/refresh", dependencies=[Depends(validate_token_header)])
 async def refresh_access_token(
     user: User = Depends(get_current_user_by_refresh_token),
 ):
@@ -64,6 +66,18 @@ async def refresh_access_token(
         data={"sub": f"{user.id}"}, expires_delta=access_token_expires
     )
     return TokenAccess(access_token=access_token)
+
+
+@router.post(
+    "/token/revoke",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(validate_token_header)],
+)
+async def revoke_refresh_token(
+    token_header: str = Depends(APIKeyHeader(name="Authorization")),
+    db: AsyncSession = Depends(get_async_session),
+):
+    await delete_refresh_token(token_header, db)
 
 
 @router.get("/me", response_model=UserOut)
