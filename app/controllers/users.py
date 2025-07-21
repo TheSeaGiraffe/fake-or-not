@@ -50,9 +50,9 @@ async def login_user(
     access_token = create_access_token(
         data={"sub": f"{user.id}"}, expires_delta=access_token_expires
     )
-    refresh_token = await create_refresh_token(user, db)
+    token = await create_refresh_token(user, db)
 
-    return Token(access_token=access_token, refresh_token=refresh_token.plaintext)
+    return Token(access_token=access_token, refresh_token=token)
 
 
 @router.post("/refresh")

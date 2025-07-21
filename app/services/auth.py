@@ -1,3 +1,5 @@
+import hashlib
+import secrets
 from datetime import datetime, timedelta, timezone
 
 import jwt
@@ -7,7 +9,7 @@ from jwt.exceptions import InvalidTokenError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import JWT_ALGORITHM, JWT_SECRET_KEY
+from app.config import JWT_ALGORITHM, JWT_REFRESH_TOKEN_LENGTH, JWT_SECRET_KEY
 from app.database.connection import get_async_session
 from app.models.refresh_token import RefreshToken
 from app.models.user import User
@@ -72,11 +74,18 @@ async def get_current_user_by_access_token(
     return user
 
 
-async def create_refresh_token(user: User, db: AsyncSession) -> RefreshToken:
-    refresh_token = RefreshToken(user=user)
+def hash_token(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()
+
+
+async def create_refresh_token(user: User, db: AsyncSession) -> str:
+    token_plaintext = secrets.token_urlsafe(JWT_REFRESH_TOKEN_LENGTH)
+    token_hash = hash_token(token_plaintext)
+
+    refresh_token = RefreshToken(hash=token_hash, user=user)
     db.add(refresh_token)
     await db.commit()
-    return refresh_token
+    return token_plaintext
 
 
 async def get_current_user_by_refresh_token(
@@ -87,9 +96,9 @@ async def get_current_user_by_refresh_token(
     if len(header_parts) != 2 or header_parts[0] != "Bearer":
         raise InvalidCredentialsException
 
-    token = header_parts[1]
+    token_hash = hash_token(header_parts[1])
     query = select(RefreshToken).where(
-        RefreshToken.plaintext == token,
+        RefreshToken.hash == token_hash,
         RefreshToken.expiry >= datetime.now(timezone.utc),
     )
     result = await db.execute(query)
@@ -97,10 +106,9 @@ async def get_current_user_by_refresh_token(
     if refresh_token is None:
         raise InvalidCredentialsException
 
-    # query = select(RefreshToken.user).where(RefreshToken.id == refresh_token.id)
-    query = select(RefreshToken).where(RefreshToken.id == refresh_token.id)
-    result = await db.execute(query)
-    # user: User | None = result.scalar_one_or_none()
-    # user: User = result.scalar_one()
-    refresh_token_from_id: RefreshToken = result.scalar_one()
-    return refresh_token_from_id.user
+    # query = select(RefreshToken).where(RefreshToken.id == refresh_token.id)
+    # result = await db.execute(query)
+    # refresh_token_from_id: RefreshToken = result.scalar_one()
+    # return refresh_token_from_id.user
+
+    return refresh_token.user

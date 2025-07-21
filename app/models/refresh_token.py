@@ -15,15 +15,14 @@ def generate_expiration_date() -> datetime:
     )
 
 
-def generate_token() -> str:
-    return secrets.token_urlsafe(JWT_REFRESH_TOKEN_LENGTH)
+# def generate_token() -> str:
+#     return secrets.token_urlsafe(JWT_REFRESH_TOKEN_LENGTH)
 
 
 class RefreshToken(Base):
     __tablename__ = "refresh_tokens"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    plaintext: Mapped[str] = mapped_column(Text, default=generate_token)
+    hash: Mapped[str] = mapped_column(Text, primary_key=True)
     expiry: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=generate_expiration_date
     )

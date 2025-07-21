@@ -1,8 +1,8 @@
 """Add tables for users and refresh tokens
 
-Revision ID: 0179fc8399dc
+Revision ID: a071c64b9cdf
 Revises: 
-Create Date: 2025-07-20 08:53:14.252791
+Create Date: 2025-07-21 14:50:51.561308
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '0179fc8399dc'
+revision: str = 'a071c64b9cdf'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -30,12 +30,11 @@ def upgrade() -> None:
     sa.UniqueConstraint('email')
     )
     op.create_table('refresh_tokens',
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('plaintext', sa.Text(), nullable=False),
+    sa.Column('hash', sa.Text(), nullable=False),
     sa.Column('expiry', sa.DateTime(timezone=True), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('hash')
     )
     # ### end Alembic commands ###
 
