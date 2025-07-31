@@ -74,6 +74,12 @@ async def get_current_user_by_access_token(
     return user
 
 
+async def has_valid_access_token(token: str = Depends(oauth2_scheme)):
+    user_id = get_access_token_payload(token)
+    if user_id is None:
+        raise InvalidCredentialsException
+
+
 def hash_token(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
 
@@ -88,7 +94,8 @@ async def create_refresh_token(user: User, db: AsyncSession) -> str:
     return token_plaintext
 
 
-# def validate_token_header(token_header: str):
+# Should probably also check the length of the token to make sure that it's actually a
+# refresh token
 def validate_token_header(
     token_header: str = Depends(APIKeyHeader(name="Authorization")),
 ) -> None:
@@ -101,7 +108,6 @@ async def get_current_user_by_refresh_token(
     token_header: str = Depends(APIKeyHeader(name="Authorization")),
     db: AsyncSession = Depends(get_async_session),
 ) -> User:
-    # token = validate_token_header(token_header)
     token = token_header.split()[1]
     token_hash = hash_token(token)
     query = select(RefreshToken).where(
@@ -117,7 +123,6 @@ async def get_current_user_by_refresh_token(
 
 
 async def delete_refresh_token(token_header: str, db: AsyncSession) -> None:
-    # token = validate_token_header(token_header)
     token = token_header.split()[1]
     token_hash = hash_token(token)
     query = delete(RefreshToken).where(RefreshToken.hash == token_hash)

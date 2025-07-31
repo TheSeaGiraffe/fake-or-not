@@ -1,10 +1,9 @@
-import secrets
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import DateTime, ForeignKey, Integer, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.config import JWT_REFRESH_TOKEN_EXPIRE_MINUTES, JWT_REFRESH_TOKEN_LENGTH
+from app.config import JWT_REFRESH_TOKEN_EXPIRE_MINUTES
 
 from .base import Base
 
@@ -13,10 +12,6 @@ def generate_expiration_date() -> datetime:
     return datetime.now(tz=timezone.utc) + timedelta(
         minutes=JWT_REFRESH_TOKEN_EXPIRE_MINUTES
     )
-
-
-# def generate_token() -> str:
-#     return secrets.token_urlsafe(JWT_REFRESH_TOKEN_LENGTH)
 
 
 class RefreshToken(Base):

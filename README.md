@@ -72,8 +72,31 @@ you can hit a protected endpoint in the following manner:
 curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzUyOTk3OTU0fQ.H9TZhGsVH0Q2K5Ftrw76mORdrJ8tX2m-IfVtyn7p9WM" localhost:8000/user/me
 ```
 
-When your access token expires, you can request a new one using your refresh token in a
-way that's identical to hitting the `/user/token` endpoint. The only difference is that
-the access token is replaced with the refresh token and the target endpoint is
-`/user/refresh`. When your refresh token expires, request another set of tokens from
-`/user/token`.
+When your access token expires, you can request a new one by sending a request to the
+`user/token/refresh` endpoint with your refresh token in the header. When your refresh
+token expires, request another set of tokens from `/user/token`. You can also revoke the
+current refresh token by hitting the `user/token/revoke` endpoint.
+
+With your access token you're now ready to use the prediction endpoint. Send Tweet text in
+a JSON object with following form:
+
+```json
+{
+  "model_input": ["<tweet_text>", ...]
+}
+```
+
+Below is an example:
+
+```bash
+curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzUzOTQ2NjM0fQ.H7MlFt4Ywnq737FJYD0l9WxjkmcYsF_oeYcZMS5Ulhk" \
+  -H "Content-Type: application/json" \
+  -d '{"model_input": ["informao que aponta que <user> mandou apagar conta de carlos bolsonaro de redes sociais por causa de hashtag <hashtag> falsa e foi negada pelo <user> entenda <url>", "os fascistas do futuro se chamaro de anti-fascistas. <user> <user> <user> <user> <user> <user> <user> <user> <url>", "usa : des policiers blancs arrtent un homme noir qui se trouve tre un agent du fbi... <hashtag> <url>"]}' \
+  localhost:8000/predict/
+```
+
+You should then get an output similar to the following:
+
+```
+{"model_predictions":[{"label":"misinformation","score":0.9992982149124146},{"label":"misinformation","score":0.9977389574050903},{"label":"misinformation","score":0.9946170449256897}]}
+```

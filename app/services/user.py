@@ -9,15 +9,8 @@ from .password import get_password_hash
 
 
 async def create_user(user: UserCreate, db: AsyncSession) -> User:
-    # Hash password
     hashed_password = get_password_hash(user.password)
 
-    # Create new user and add to database
-    # db_user = User(
-    #     email=user.email,
-    #     name=user.name,
-    #     password_hash=hashed_password,
-    # )
     db_user = User(
         **user.model_dump(exclude={"password"}),
         password_hash=hashed_password,
@@ -32,7 +25,3 @@ async def create_user(user: UserCreate, db: AsyncSession) -> User:
         )
 
     return db_user
-
-
-# async def get_user_by_email():
-#     pass

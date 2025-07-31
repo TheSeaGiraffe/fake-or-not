@@ -1,12 +1,19 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
-from app.controllers import users
+from app.controllers import predictions, users
+from app.services.model import cleanup_model, init_model
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_model()
+    yield
+    cleanup_model()
+
+
+app = FastAPI(lifespan=lifespan)
 
 app.include_router(users.router)
-
-
-@app.get("/")
-async def hello_world():
-    return {"hello": "world"}
+app.include_router(predictions.router)
