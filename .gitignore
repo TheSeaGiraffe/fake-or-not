@@ -11,3 +11,6 @@ wheels/
 
 # Env files
 .env
+
+# pytorch model
+model/pytorch_model.bin
