@@ -11,7 +11,3 @@ wheels/
 
 # Env files
 .env
-
-# pytorch model
-model/pytorch_model.bin
-model/training_args.bin
