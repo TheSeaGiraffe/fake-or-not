@@ -1,0 +1,16 @@
+# Ignore all the hidden stuff except for .python-version
+.env*
+.git*
+.git/
+.mypy_cache/
+.venv/
+.dockerignore
+
+# Ignore the following directories and files
+Dockerfile
+__pycache__/
+tests/
+*.bak
+docker-compose*.yml
+justfile
+README.md

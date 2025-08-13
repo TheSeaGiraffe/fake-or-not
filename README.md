@@ -1,52 +1,42 @@
-# Misinformation detection API
+# `fake-or-not`
 
 This is a simple API that provides predictions on whether a given Tweet contains
-misinformation. It uses a BERT model fine-tuned on the text portion of the MuMiN dataset.
+misinformation. It uses an IndoBERT model fine-tuned on the text portion of the MuMiN
+dataset. It's meant to work with Indonesian text but also works surprisingly well on other
+languages.
 
-## Installation and Setup
+## Motivation
 
-Make sure you have the following prerequisites installed:
+I originally fine-tuned an IndoBERT model to detect misinformation in the text portion of
+Tweets as part of my Masters' thesis. I wanted to find some way to allow others to more
+easily demo my trained model but, at the time, lacked the technical skill and knowledge to
+come up with a solution. After a few months of self-study this is that solution.
 
-- `docker`
-- `uv`
-- `just` (optional)
+## Quick Start
 
-Afterwards, clone the repo then install all project dependencies by running
-
-```bash
-uv sync
-```
-
-then create an `.env` file using the `.env.example` as a template. Once that's done spin
-up a database container instance with
+I've containerized the API for a mostly painless setup. You'll need to make sure that you
+have [`docker`](https://docs.docker.com/engine/install/) installed and then clone the
+repo. Before we can launch the app, make sure that you've created a `.env` file using the
+template provided in the `.env.example` file. Remember to leave the `POSTGRES_HOST`
+variable as is since that's the name of the database server in the `docker-compose.yml`
+file. You can then spin up the app with
 
 ```bash
 docker compose up -d
 ```
 
-and then apply all database migrations by running one of the following commands
+If you have a GPU and would like to enable GPU support make sure that you've installed the
+[Nvidia CUDA Toolkit](https://developer.nvidia.com/cuda-downloads) and the [Nvidia Container Tookit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html) then run:
 
 ```bash
-# If just has been installed
-just migrate_up
-
-# If just has not been installed
-uv run alembic upgrade head
+docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d
 ```
 
-Finally, start the API with
+## Usage
 
-```bash
-# If just has been installed
-just run_uvicorn
+### Registering a user
 
-# If just has not been installed
-uv run uvicorn app.main:app --port 8000
-```
-
-## Basic Usage
-
-Register a user using the `/user/register` endpoint:
+You can register a user using the `/user/register` endpoint:
 
 ```bash
 curl -H "Content-Type: application/json" \
@@ -77,6 +67,8 @@ When your access token expires, you can request a new one by sending a request t
 token expires, request another set of tokens from `/user/token`. You can also revoke the
 current refresh token by hitting the `user/token/revoke` endpoint.
 
+### Inference
+
 With your access token you're now ready to use the prediction endpoint. Send Tweet text in
 a JSON object with following form:
 
@@ -99,4 +91,47 @@ You should then get an output similar to the following:
 
 ```
 {"model_predictions":[{"label":"misinformation","score":0.9992982149124146},{"label":"misinformation","score":0.9977389574050903},{"label":"misinformation","score":0.9946170449256897}]}
+```
+
+## Contributing
+
+Make sure you have the following prerequisites installed:
+
+- `docker`
+- `uv`
+- `just` (optional)
+
+Afterwards, clone the repo then install all project dependencies by running
+
+```bash
+uv sync
+```
+
+then create an `.env` file using the `.env.example` as a template. Don't forget to set the
+`POSTGRES_HOST` variable to `localhost`. Once that's done install and setup a Postgres
+database or spin one up in a docker container using the provided
+`docker-compose.database.dev.yml` file
+
+```bash
+docker compose -f docker-compose.database.dev.yml up -d
+```
+
+and then apply all database migrations by running one of the following commands
+
+```bash
+# If just has been installed
+just migrate_up
+
+# If just has not been installed
+uv run alembic upgrade head
+```
+
+Finally, start the API with
+
+```bash
+# If just has been installed
+just run_uvicorn
+
+# If just has not been installed
+uv run uvicorn app.main:app --port 8000
 ```

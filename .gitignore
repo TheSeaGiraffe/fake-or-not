@@ -10,4 +10,13 @@ wheels/
 .venv
 
 # Env files
-.env
+.env*
+
+# bak files
+*.bak
+
+# Some docker-compose files
+docker-compose*.yml
+!docker-compose.yml
+!docker-compose.database.dev.yml
+!docker-compose.gpu.yml
