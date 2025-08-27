@@ -375,6 +375,15 @@ wheels = [
 ]
 
 [[package]]
+name = "demoji"
+version = "1.1.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/9d/62/e6de96cf1ef2c6ac91b84a51af151d791f874529d8b146d3587771d05727/demoji-1.1.0.tar.gz", hash = "sha256:072efaeca725e6f63ab59d83abeb55b178842538ed9256455a82ebbd055ff216", size = 46253, upload-time = "2021-08-29T19:22:42.695Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/03/66/9dc4b6d57f3a74ad8cf79f0cc4e965165871bfb3f612db77ccd4e0200b38/demoji-1.1.0-py3-none-any.whl", hash = "sha256:6d3256c909aea299e97fe984f827a2a060c2a8f8bfcbafa7ec9659967c5df50f", size = 42851, upload-time = "2021-08-29T19:22:40.78Z" },
+]
+
+[[package]]
 name = "dnspython"
 version = "2.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -871,6 +880,7 @@ dependencies = [
     { name = "alembic" },
     { name = "asyncpg" },
     { name = "bcrypt" },
+    { name = "demoji" },
     { name = "fastapi", extra = ["standard"] },
     { name = "passlib", extra = ["argon2"] },
     { name = "pyjwt" },
@@ -893,6 +903,7 @@ requires-dist = [
     { name = "alembic", specifier = ">=1.16.4" },
     { name = "asyncpg", specifier = ">=0.30.0" },
     { name = "bcrypt", specifier = ">=4.3.0" },
+    { name = "demoji", specifier = ">=1.1.0" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.116.0" },
     { name = "passlib", extras = ["argon2"], specifier = ">=1.7.4" },
     { name = "pyjwt", specifier = ">=2.10.1" },
